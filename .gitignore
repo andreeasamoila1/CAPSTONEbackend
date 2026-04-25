@@ -19,9 +19,8 @@ target/
 *.iml
 *.ipr
 # Environment variables
- .env
- *.env
-
+.env
+*.env
  # Local config
  application-local.properties
 
