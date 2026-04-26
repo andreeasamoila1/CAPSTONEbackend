@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+
+  # Database for Identity Service
+  identity-db:
+    image: postgres:15
+    container_name: identity-db
+    environment:
+      POSTGRES_DB: identity_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${IDENTITY_DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - identity-db-data:/var/lib/postgresql/data
+    networks:
+      - capstone-network
+
+  # Identity Service
+  identity-service:
+    build:
+      context: ./identity-service
+      dockerfile: Dockerfile
+    container_name: identity-service
+    ports:
+      - "8081:8081"
+    environment:
+      DB_URL: ${IDENTITY_DB_URL}
+      DB_USERNAME: postgres
+      DB_PASSWORD: ${IDENTITY_DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: 86400000
+    depends_on:
+      - identity-db
+    networks:
+      - capstone-network
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    networks:
+      - capstone-network
+
+networks:
+  capstone-network:
+    driver: bridge
+
+volumes:
+  identity-db-data:
